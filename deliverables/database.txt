@@ -1,0 +1,49 @@
+-- Base de datos
+create database if not exists reservation_system;
+use reservation_system;
+
+-- Tabla users
+create table users (
+    id bigint auto_increment primary key,
+    username varchar(100) not null unique,
+    email varchar(150) not null unique,
+    password varchar(255) not null,
+    active boolean not null default true,
+    created_at datetime not null default current_timestamp
+);
+
+-- Tabla roles
+create table roles (
+    id bigint auto_increment primary key,
+    name varchar(50) not null unique
+);
+
+-- Tabla intermedia users_roles (N:M)
+create table user_role (
+    user_id bigint not null,
+    role_id bigint not null,
+    primary key (user_id, role_id),
+    foreign key (user_id) references users(id) on delete cascade,
+    foreign key (role_id) references roles(id) on delete cascade
+);
+
+-- Tabla resources
+create table resources (
+    id bigint auto_increment primary key,
+    name varchar(100) not null,
+    description varchar(255),
+    active boolean not null default true
+);
+
+-- Tabla reservations
+create table reservations (
+    id bigint auto_increment primary key,
+    user_id bigint not null,
+    resource_id bigint not null,
+    start_date_time datetime not null,
+    end_date_time datetime not null,
+    status varchar(20) not null,
+    created_at datetime not null default current_timestamp,
+    foreign key (user_id) references users(id) on delete cascade,
+    foreign key (resource_id) references resources(id) on delete cascade
+);

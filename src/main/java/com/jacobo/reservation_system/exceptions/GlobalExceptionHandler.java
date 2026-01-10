@@ -54,5 +54,14 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(RoleNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleRoleNotValid(RoleNotValidException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "Role not valid",
+                        "message", ex.getMessage()
+                ));
+    }
 }
 

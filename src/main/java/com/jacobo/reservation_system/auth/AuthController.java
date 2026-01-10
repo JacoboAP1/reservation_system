@@ -1,9 +1,6 @@
-package com.jacobo.reservation_system.controllers;
+package com.jacobo.reservation_system.auth;
 
-import com.jacobo.reservation_system.exceptions.InvalidEmailException;
-import com.jacobo.reservation_system.exceptions.MissFillingFieldsException;
-import com.jacobo.reservation_system.exceptions.UserNotFoundException;
-import com.jacobo.reservation_system.exceptions.UsernameAlreadyExistsException;
+import com.jacobo.reservation_system.exceptions.*;
 import com.jacobo.reservation_system.models.dtos.RegisterRequest;
 import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
@@ -16,21 +13,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import io.swagger.v3.oas.annotations.Operation; // Importa las librerías para documentar endpoints con etiquetas de swagger
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Controlador para la autenticación y registro de usuarios.
- * Sistema con un único rol ("USER") según requerimientos del proyecto GenoSentinel.
+ * Controller for authentication and user register
+ * System with role USER and ADMIN according to the project requirements
  */
-@Tag(name = "Autenticación", description = "Endpoints para el registro y login de usuarios") // Swagger annotation
+@Tag(name = "Authentication", description = "Endpoints for register and user login") // Swagger annotation
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -53,13 +46,13 @@ public class AuthController {
      */
     private final JwtService jwt;
     /**
-     * PasswordEncoder para encriptar contraseñas.
+     * PasswordEncoder to encrypt passwords.
      */
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Endpoint de login de usuario.
-     * Valida credenciales, correo y genera un token JWT.
+     * User login endpoint.
+     * Validates credentials, email and generates a JWT token.
      */
     @Operation (
             summary = "Iniciar sesión",
@@ -141,11 +134,15 @@ public class AuthController {
         Set<Roles> roleEntities = new HashSet<>();
         for (String roleName : roleNames) {
             Roles role = rolRepo.findByName(roleName).orElseGet(() -> {
-                Roles newRole = new Roles();
-                newRole.setName(roleName);
-                return rolRepo.save(newRole);
+                if (roleName.equals("USER") || roleName.equals("ADMIN")) {
+                    Roles newRole = new Roles();
+                    newRole.setName(roleName);
+                    return rolRepo.save(newRole);
+                }
+                throw new RoleNotValidException("You must register as ADMIN or USER");
             });
             roleEntities.add(role);
+
         }
 
         Users user = new Users();

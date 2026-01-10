@@ -15,75 +15,75 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Filtro de autenticación JWT para Spring Security.
- * Intercepta cada petición HTTP y valida el token JWT presente en la cabecera Authorization.
- * Si el token es válido, establece la autenticación en el contexto de seguridad con los roles del usuario.
- * Si el token es inválido o no está presente, la petición continúa sin autenticación.
+ * JWT authentication filter for Spring Security
+ * It intercepts each HTTP request and validates the JWT token present in the Authorization header
+ * If the token is valid, it establishes authentication in the security context with the user roles
+ * If the token is invalid or not present, the request continues without authentication
  */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     /**
-     * Servicio para la gestión y validación de tokens JWT.
+     * Service for the management and validation of JWT tokens
      */
     private final JwtService jwtService;
 
     /**
-     * Constructor que inyecta el servicio JWT.
-     * @param jwtService servicio para parsear y validar tokens
+     * Constructor that injects the JWT service
+     * @param jwtService service to parse and validate tokens
      */
     public JwtAuthFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
     /**
-     * Método principal del filtro que intercepta cada petición HTTP.
-     * Extrae el token JWT de la cabecera Authorization, lo valida y establece la autenticación.
-     * Si el token no es válido, limpia el contexto de seguridad.
-     * @param req petición HTTP
-     * @param res respuesta HTTP
-     * @param chain cadena de filtros
-     * @throws ServletException si ocurre un error en el filtro
-     * @throws IOException si ocurre un error de IO
+     * Main method of the filter that intercepts each HTTP request
+     * Extract the JWT token from the Authorization header, validate it, and establish authentication
+     * If the token is invalid, clear the security context
+     * @param req HTTP request
+     * @param res HTTP response
+     * @param chain filter chain
+     * @throws ServletException if an error occurs in the filter
+     * @throws IOException if an I/O error occurs
      */
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
-        // Extrae la cabecera Authorization
+        // Extract the Authorization header
         String header = req.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(req, res);
             return;
         }
 
-        // Extrae el token JWT
+        // Extract the JWT token
         String token = header.substring(7);
         try {
-            // Parsea y valida el token
+            // Parse and validate the token
             io.jsonwebtoken.Claims claims = jwtService.parse(token);
             String username = claims.getSubject();
 
             @SuppressWarnings("unchecked")
             List<String> roles = (List<String>) claims.get("roles");
 
-            // Convierte los roles en autoridades de Spring Security
+            // Convert roles into Spring Security authorities
             List<SimpleGrantedAuthority> authorities =
                     (roles == null ? List.<String>of() : roles).stream()
                             .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r)
                             .map(SimpleGrantedAuthority::new)
                             .toList();
 
-            // Crea el token de autenticación y lo establece en el contexto
+            // Create the authentication token and set it in the context
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(username, "N/A", authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (Exception e) {
-            // Si el token es inválido, limpia el contexto de seguridad
+            //If the token is invalid, clear the security context
             SecurityContextHolder.clearContext();
         }
 
-        // Continúa con la cadena de filtros
+        //Continue with the filter chain
         chain.doFilter(req, res);
     }
 }

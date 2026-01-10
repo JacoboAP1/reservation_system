@@ -1,64 +1,64 @@
 package com.jacobo.reservation_system.models.entities;
 
-// Importaciones para JPA, Lombok y Spring Security
-import jakarta.persistence.*; // Anotaciones para entidades y relaciones
-import lombok.Data; // Genera getters/setters, equals, hashCode, toString
-import org.springframework.security.core.GrantedAuthority; // Representa una autoridad (rol)
-import org.springframework.security.core.userdetails.UserDetails; // Interfaz para usuarios autenticables
-import java.util.Collection; // Colección para roles
-import java.util.HashSet; // Implementación de Set
-import java.util.Set; // Interfaz para roles
-import java.util.stream.Collectors; // Utilidad para transformar colecciones
+// Imports for JPA, Lombok, and Spring Security
+import jakarta.persistence.*; // Annotations for entities and relationships
+import lombok.Data; // Generate getters/setters, equals, hashCode, toString
+import org.springframework.security.core.GrantedAuthority; // Represents an authority (role)
+import org.springframework.security.core.userdetails.UserDetails; // Interface for authenticated users
+import java.util.Collection; // Collection for roles
+import java.util.HashSet; // Set Implementation
+import java.util.Set; // Interface for roles
+import java.util.stream.Collectors; // Utility for transforming collections
 
 /**
- * Entidad que representa un usuario del sistema GenomeBank.
- * Cada usuario puede tener uno o más roles asignados y se utiliza
- * en el proceso de autenticación y autorización mediante JWT.
- * Se mapea a la tabla "users" en la base de datos.
+ * Entity that represents a user of the system
+ * Each user can have one or more assigned roles and is used
+ * in the authentication and authorization process using JWT
+ * It is mapped to the "users" table in the database
  */
-@Entity // Marca la clase como entidad JPA
-@Table(name = "users") // Define la tabla en la base de datos
-@Data // Lombok: genera getters/setters y otros métodos
-public class Users implements UserDetails { // Implementa UserDetails para integración con Spring Security
-    @Id // Clave primaria
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincremental
-    private Long id; // Identificador único del usuario
+@Entity // Mark the class as a JPA entity
+@Table(name = "users") // Define the table in the database
+@Data // Lombok: Generates getters/setters and other methods
+public class Users implements UserDetails { // Implement UserDetails for integration with Spring Security
+    @Id // Primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincrement
+    private Long id; // Unique user identifier
 
-    @Column(nullable = false, unique = true, length = 100) // Username único y obligatorio
-    private String username; // Nombre de usuario
+    @Column(nullable = false, unique = true, length = 100) // Unique and mandatory username
+    private String username; // Username
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false) // Contraseña obligatoria
-    private String password; // Contraseña encriptada
+    @Column(nullable = false) // Mandatory password
+    private String password; // Encrypted password
 
-    private Boolean active = true; // Indica si el usuario está activo
+    private Boolean active = true; // Indicates if the user is active
 
-    @ManyToMany(fetch = FetchType.EAGER) // Relación muchos a muchos con roles, carga inmediata
+    @ManyToMany(fetch = FetchType.EAGER) // Many-to-many relationships with roles, immediate loading
     @JoinTable(
-            name = "user_role", // Tabla intermedia
-            joinColumns = @JoinColumn(name = "user_id"), // FK usuario
-            inverseJoinColumns = @JoinColumn(name = "role_id") // FK rol
+            name = "user_role", // Intermediate table
+            joinColumns = @JoinColumn(name = "user_id"), // User FK
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Role FK
     )
-    private Set<Roles> roles = new HashSet<>(); // Conjunto de roles asignados al usuario
+    private Set<Roles> roles = new HashSet<>(); // Set of roles assigned to the user
 
     @OneToMany(mappedBy = "user") // Attribute name from Reservations (user)
     private Set<Reservations> reservations;
 
-    // Devuelve las autoridades (roles) del usuario para Spring Security
+    // Returns the user's authority (role) for Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Transforma cada rol en una autoridad con prefijo "ROLE_"
+        // Transform each role into an authority with the prefix "ROLE_"
         return roles.stream()
                 .map(r -> (GrantedAuthority) () -> "ROLE_" + r.getName())
                 .collect(Collectors.toSet());
     }
 
-    // Métodos requeridos por UserDetails para el control de la cuenta
-    @Override public boolean isAccountNonExpired() { return true; } // La cuenta nunca expira
-    @Override public boolean isAccountNonLocked() { return true; } // La cuenta nunca se bloquea
-    @Override public boolean isCredentialsNonExpired() { return true; } // Las credenciales nunca expiran
-    @Override public boolean isEnabled() { return active; } // El usuario está habilitado si activo es true
+    // Methods required by UserDetails for account control
+    @Override public boolean isAccountNonExpired() { return true; } // The account never expires
+    @Override public boolean isAccountNonLocked() { return true; } // The account is never blocked
+    @Override public boolean isCredentialsNonExpired() { return true; } // Credentials never expire
+    @Override public boolean isEnabled() { return active; } // The user is enabled if active is true
 }
 

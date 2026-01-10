@@ -14,35 +14,35 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
-import io.swagger.v3.oas.annotations.Operation; // Importa las librerías para documentar endpoints con etiquetas de swagger
+import io.swagger.v3.oas.annotations.Operation; // Imports libraries to document endpoints with Swagger annotations
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Controller for authentication and user register
+ * Controller for authentication and user registration
  * System with role USER and ADMIN according to the project requirements
  */
-@Tag(name = "Authentication", description = "Endpoints for register and user login") // Swagger annotation
+@Tag(name = "Authentication", description = "Endpoints register and login for user") // Swagger annotation
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     /**
-     * AuthenticationManager de Spring Security para autenticar usuarios.
+     * AuthenticationManager from Spring Security to authenticate users
      */
     private final AuthenticationManager authManager;
     /**
-     * Repositorio para la gestión de usuarios.
+     * Repository for user management
      */
     private final UsersRepository usuarioRepo;
     /**
-     * Repositorio para la gestión de roles.
+     * Repository for role management
      */
     private final RolesRepository rolRepo;
     /**
-     * Servicio para la gestión de JWT.
+     * Service for JWT management
      */
     private final JwtService jwt;
     /**
@@ -55,14 +55,15 @@ public class AuthController {
      * Validates credentials, email and generates a JWT token.
      */
     @Operation (
-            summary = "Iniciar sesión",
-            description = "Autentica al usuario con su nombre de usuario, correo y contraseña. Retorna un token JWT si las credenciales son válidas"
+            summary = "Login",
+            description = "Authenticate the user with his username, email and password. " +
+                    "Return a JWT token if the credentials are valid"
     ) //Swagger annotation
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Autenticación exitosa, retorna token JWT"),
-            @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
-            @ApiResponse(responseCode = "400", description = "Solicitud mal formada"),
-            @ApiResponse(responseCode = "404", description = "No se encontró el nombre de usuario")
+            @ApiResponse(responseCode = "200", description = "Successful authentication, returns JWT token"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "404", description = "Username was not found")
     }) //Swagger annotation
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> req) {
@@ -77,16 +78,16 @@ public class AuthController {
             throw new MissFillingFieldsException("Fill all the fields");
         }
 
-        // Busca usuario en base de datos
+        // Search for users in the database
         var user = usuarioRepo.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("El nombre de usuario no existe"));
+                .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
 
-        // Valida que el email coincida
+        // Check for email coincidence
         if (!email.equals(user.getEmail())) {
-            throw new InvalidEmailException("El correo electrónico no coincide con el registrado.");
+            throw new InvalidEmailException("The email does not match with the registered one");
         }
 
-        // Si las credenciales son incorrectas, lanza AuthenticationException → 401 por defecto
+        // If the credentials are incorrect, throws AuthenticationException → 401 by default
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         var roles = user.getRoles().stream().map(Roles::getName).toList();
@@ -101,17 +102,18 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para registrar nuevos usuarios.
-     * Crea usuario con rol único "USER" y devuelve token JWT.
+     * Endpoint to register new users
+     * Creates user with role USER or ADMIN and returns a JWT token
      */
     @Operation(
-            summary = "Registrar nuevo usuario",
-            description = "Crea un nuevo usuario con su nombre, correo y contraseña. Retorna un token JWT al registrarse correctamente"
+            summary = "Register new user",
+            description = "Creates a new user with his username, email and password. " +
+                    "Returns a JWT token by successful registration"
     ) //Swagger annotation
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Usuario registrado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o faltantes"),
-            @ApiResponse(responseCode = "409", description = "El nombre de usuario ya existe")
+            @ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid or missed data"),
+            @ApiResponse(responseCode = "409", description = "Username already exists")
     }) //Swagger annotation
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -130,7 +132,7 @@ public class AuthController {
                 ? List.of("USER")
                 : req.getRoles();
 
-        // Manejo correcto de roles para evitar ConcurrentModificationException
+        // Correct management of role to avoid ConcurrentModificationException
         Set<Roles> roleEntities = new HashSet<>();
         for (String roleName : roleNames) {
             Roles role = rolRepo.findByName(roleName).orElseGet(() -> {
@@ -164,7 +166,7 @@ public class AuthController {
     }
 
     /**
-     * Maneja errores de autenticación devolviendo un mensaje estándar.
+     * Manage authentication errors returning a standard message
      */
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)

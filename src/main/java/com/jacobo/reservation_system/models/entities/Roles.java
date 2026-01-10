@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 /**
- * Entidad que representa un rol de usuario dentro del sistema.
- * Los roles determinan los permisos de acceso y se utilizan en la autenticación
- * y autorización mediante JWT.
- * Se mapea a la tabla "roles".
+ * Entity that represents a user role within the system
+ * Roles determine access permissions and are used in authentication
+ * and authorization via JWT
+ * It is mapped to the "roles" table
  */
 @Entity
 @Table(name = "roles")
@@ -18,6 +18,6 @@ public class Roles {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String name; // USER only.
+    private String name;
 }
 

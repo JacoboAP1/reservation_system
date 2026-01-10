@@ -13,7 +13,7 @@ public class Resources {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100,
-            name = "name") // Name único y obligatorio
+            name = "name") // Unique and mandatory name
     private String name;
 
     @Column(name = "description")

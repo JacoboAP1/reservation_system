@@ -10,22 +10,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Configuración de autenticación y seguridad para la aplicación.
- * Define beans para la codificación de contraseñas y la carga de detalles de usuario.
- * Utiliza BCrypt para la seguridad de contraseñas y conecta el repositorio de usuarios para la autenticación.
+ * Authentication and security settings for the application
+ * Define beans for password encoding and loading user details
+ * It uses BCrypt for password security and connects the user repository for authentication
  */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class AuthConfig {
     /**
-     * Repositorio para la gestión de usuarios en la autenticación.
+     * Repository for user management in authentication
      */
     private final UsersRepository usersRepository;
 
     /**
-     * Bean para la codificación de contraseñas usando BCrypt.
-     * @return PasswordEncoder seguro para almacenar contraseñas
+     * Bean for password encoding using BCrypt
+     * @return Secure PasswordEncoder for storing passwords
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,14 +33,14 @@ public class AuthConfig {
     }
 
     /**
-     * Bean para cargar los detalles de usuario desde la base de datos.
-     * Utilizado por Spring Security para autenticar usuarios.
-     * @return UserDetailsService que busca usuarios por nombre de usuario
+     * Bean to load user details from the database
+     * Used by Spring Security to authenticate users
+     * @return UserDetailsService that searches for users by username
      */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> usersRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
 

@@ -1,7 +1,6 @@
 package com.jacobo.reservation_system.models.dtos;
 
 import lombok.Data;
-
 import java.util.List;
 
 @Data

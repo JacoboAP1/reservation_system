@@ -1,4 +1,4 @@
-package com.jacobo.reservation_system.auth;
+package com.jacobo.reservation_system.controllers;
 
 import com.jacobo.reservation_system.exceptions.*;
 import com.jacobo.reservation_system.models.dtos.RegisterRequest;
@@ -36,11 +36,11 @@ public class AuthController {
     /**
      * Repository for user management
      */
-    private final UsersRepository usuarioRepo;
+    private final UsersRepository userRepo;
     /**
      * Repository for role management
      */
-    private final RolesRepository rolRepo;
+    private final RolesRepository roleRepo;
     /**
      * Service for JWT management
      */
@@ -52,11 +52,11 @@ public class AuthController {
 
     /**
      * User login endpoint.
-     * Validates credentials, email and generates a JWT token.
+     * Validates credentials, email and generates a JWT token
      */
     @Operation (
             summary = "Login",
-            description = "Authenticate the user with his username, email and password. " +
+            description = "Authenticate the user with his username, email and password " +
                     "Return a JWT token if the credentials are valid"
     ) //Swagger annotation
     @ApiResponses({
@@ -79,7 +79,7 @@ public class AuthController {
         }
 
         // Search for users in the database
-        var user = usuarioRepo.findByUsername(username)
+        var user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
 
         // Check for email coincidence
@@ -91,7 +91,6 @@ public class AuthController {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         var roles = user.getRoles().stream().map(Roles::getName).toList();
-
         String token = jwt.generate(user.getUsername(), roles);
 
         return Map.of(
@@ -124,7 +123,7 @@ public class AuthController {
 
             throw new MissFillingFieldsException("Fill all the fields");
         }
-        if (usuarioRepo.findByUsername(req.getUsername()).isPresent()) {
+        if (userRepo.findByUsername(req.getUsername()).isPresent()) {
             throw new UsernameAlreadyExistsException("Enter another username");
         }
 
@@ -135,16 +134,17 @@ public class AuthController {
         // Correct management of role to avoid ConcurrentModificationException
         Set<Roles> roleEntities = new HashSet<>();
         for (String roleName : roleNames) {
-            Roles role = rolRepo.findByName(roleName).orElseGet(() -> {
+            Roles role = roleRepo.findByName(roleName).orElseGet(() -> {
                 if (roleName.equals("USER") || roleName.equals("ADMIN")) {
                     Roles newRole = new Roles();
                     newRole.setName(roleName);
-                    return rolRepo.save(newRole);
+                    return roleRepo.save(newRole);
                 }
+
                 throw new RoleNotValidException("You must register as ADMIN or USER");
             });
-            roleEntities.add(role);
 
+            roleEntities.add(role);
         }
 
         Users user = new Users();
@@ -153,7 +153,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRoles(roleEntities);
 
-        usuarioRepo.save(user);
+        userRepo.save(user);
 
         List<String> roles = roleEntities.stream().map(Roles::getName).toList();
         String token = jwt.generate(user.getUsername(), roles);

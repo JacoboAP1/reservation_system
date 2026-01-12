@@ -6,7 +6,7 @@ import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
 import com.jacobo.reservation_system.repositories.RolesRepository;
 import com.jacobo.reservation_system.repositories.UsersRepository;
-import com.jacobo.reservation_system.services.JwtService;
+import com.jacobo.reservation_system.services.implementation.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;

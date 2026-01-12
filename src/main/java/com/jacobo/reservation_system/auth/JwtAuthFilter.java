@@ -1,6 +1,6 @@
 package com.jacobo.reservation_system.auth;
 
-import com.jacobo.reservation_system.services.JwtService;
+import com.jacobo.reservation_system.services.implementation.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

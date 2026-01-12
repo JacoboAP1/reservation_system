@@ -1,4 +1,4 @@
-package com.jacobo.reservation_system.services;
+package com.jacobo.reservation_system.services.implementation;
 
 // Import the classes needed to work with JWT
 import io.jsonwebtoken.Claims; // It represents the claims (information) within the JWT token

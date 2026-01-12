@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.Map;
 
 /**
@@ -53,6 +54,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // Bad request of role when registering
     @ExceptionHandler(RoleNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleRoleNotValid(RoleNotValidException ex) {
         return ResponseEntity
@@ -60,6 +62,18 @@ public class GlobalExceptionHandler {
                 .body(Map.of(
                         "error", "Role not valid",
                         "message", ex.getMessage()
+                ));
+    }
+
+    // Spring security exception caught here to throw another HTTP status
+    // Not 403 forbidden
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        "error", "Invalid role for that action",
+                        "message", "Only ADMIN users can access this resource"
                 ));
     }
 }

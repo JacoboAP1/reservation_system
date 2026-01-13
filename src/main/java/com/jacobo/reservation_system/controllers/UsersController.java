@@ -1,17 +1,15 @@
 package com.jacobo.reservation_system.controllers;
 
-import com.jacobo.reservation_system.models.dtos.UserDtos.GetAllUsersOutDTO;
-import com.jacobo.reservation_system.models.dtos.UserDtos.GetUserByIdOutDTO;
+import com.jacobo.reservation_system.models.dtos.UserDtos.*;
 import com.jacobo.reservation_system.services.implementation.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
@@ -63,5 +61,37 @@ public class UsersController {
     @PreAuthorize("hasRole('ADMIN')")
     public GetUserByIdOutDTO getUsersById(@PathVariable("id") Long id) {
         return userService.getUserById(id);
+    }
+
+    @Operation(
+            summary = "Deactivate user",
+            description = "Deactivates user by changing his state"
+    ) //Swagger annotation
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success message returned"),
+            @ApiResponse(responseCode = "409", description = "Failure message returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized role for that action")
+    }) //Swagger annotation
+    @PatchMapping("deactivate_user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public DeactivateUserOutDTO deactivateUser(@PathVariable("id") Long id) {
+        return userService.deactivateUser(id);
+    }
+
+    @Operation(
+            summary = "Delete user",
+            description = "Deletes user by searching for his ID"
+    ) //Swagger annotation
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success message returned"),
+            @ApiResponse(responseCode = "404", description = "Not user found to delete"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized role for that action")
+    }) //Swagger annotation
+    @DeleteMapping("delete_user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DeleteUserOutDTO> deleteUser(@PathVariable("id") Long id) {
+        DeleteUserOutDTO outDto = userService.deleteUser(id);
+
+        return ResponseEntity.ok(outDto);
     }
 }

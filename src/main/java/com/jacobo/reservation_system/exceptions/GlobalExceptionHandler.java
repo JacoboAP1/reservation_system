@@ -1,5 +1,6 @@
 package com.jacobo.reservation_system.exceptions;
 
+import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUserOutDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -49,7 +50,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
-                        "error", "Not user found with that username",
+                        "error", "Not user found with that ID",
                         "message", ex.getMessage()
                 ));
     }
@@ -75,6 +76,16 @@ public class GlobalExceptionHandler {
                         "error", "Invalid role for that action",
                         "message", "Only ADMIN users can access this resource"
                 ));
+    }
+
+    @ExceptionHandler(UserDeactivationException.class)
+    public ResponseEntity<DeactivateUserOutDTO> handleAccessDenied(UserDeactivationException ex) {
+        DeactivateUserOutDTO outDto = new DeactivateUserOutDTO();
+        outDto.setSuccess(false);
+        outDto.setMessage(ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT).body(outDto);
     }
 }
 

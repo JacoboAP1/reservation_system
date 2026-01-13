@@ -82,6 +82,11 @@ public class AuthController {
         var user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
 
+        if (!user.getActive()) {
+            throw new UserDeactivationException("Not possible to log in because the user is " +
+                    "deactivated");
+        }
+
         // Check for email coincidence
         if (!email.equals(user.getEmail())) {
             throw new InvalidEmailException("The email does not match with the registered one");

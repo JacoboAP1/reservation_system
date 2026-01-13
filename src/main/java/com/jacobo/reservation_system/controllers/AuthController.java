@@ -6,7 +6,7 @@ import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
 import com.jacobo.reservation_system.repositories.RolesRepository;
 import com.jacobo.reservation_system.repositories.UsersRepository;
-import com.jacobo.reservation_system.services.JwtService;
+import com.jacobo.reservation_system.services.implementation.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -81,6 +81,11 @@ public class AuthController {
         // Search for users in the database
         var user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
+
+        if (!user.getActive()) {
+            throw new UserDeactivationException("Not possible to log in because the user is " +
+                    "deactivated");
+        }
 
         // Check for email coincidence
         if (!email.equals(user.getEmail())) {

@@ -33,6 +33,10 @@ public class Users implements UserDetails { // Implement UserDetails for integra
     @Column(nullable = false) // Mandatory password
     private String password; // Encrypted password
 
+    /**
+     * Hibernate ORM translates this data type to tinyint
+     * automatically to MySQL
+     */
     private Boolean active = true; // Indicates if the user is active
 
     @ManyToMany(fetch = FetchType.EAGER) // Many-to-many relationships with roles, immediate loading

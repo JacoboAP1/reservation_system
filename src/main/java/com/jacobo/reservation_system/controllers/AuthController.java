@@ -1,7 +1,7 @@
 package com.jacobo.reservation_system.controllers;
 
-import com.jacobo.reservation_system.exceptions.*;
-import com.jacobo.reservation_system.models.dtos.RegisterRequest;
+import com.jacobo.reservation_system.exceptions.AuthExceptions.*;
+import com.jacobo.reservation_system.models.dtos.AuthDtos.RegisterRequest;
 import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
 import com.jacobo.reservation_system.repositories.RolesRepository;
@@ -51,7 +51,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * User login endpoint.
+     * User login endpoint
      * Validates credentials, email and generates a JWT token
      */
     @Operation (

@@ -1,5 +1,11 @@
 package com.jacobo.reservation_system.exceptions;
 
+import com.jacobo.reservation_system.exceptions.AuthExceptions.*;
+import com.jacobo.reservation_system.exceptions.ResourcesExceptions.CreateResourceException;
+import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceAlreadyCreatedException;
+import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceDeactivationException;
+import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceNotFoundException;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourceOutDTO;
 import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUserOutDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +56,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
-                        "error", "Not user found with that ID",
+                        "error", "Not user found",
                         "message", ex.getMessage()
                 ));
     }
@@ -79,8 +85,45 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserDeactivationException.class)
-    public ResponseEntity<DeactivateUserOutDTO> handleAccessDenied(UserDeactivationException ex) {
+    public ResponseEntity<DeactivateUserOutDTO> handleUserDeactivation(UserDeactivationException ex) {
         DeactivateUserOutDTO outDto = new DeactivateUserOutDTO();
+        outDto.setSuccess(false);
+        outDto.setMessage(ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT).body(outDto);
+    }
+
+    @ExceptionHandler(CreateResourceException.class)
+    public ResponseEntity<Map<String, Object>> handleCreateResource(CreateResourceException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST).body(Map.of(
+                        "error", "Name or description empty",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ResourceAlreadyCreatedException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceCreated(ResourceAlreadyCreatedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_ACCEPTABLE).body(Map.of(
+                        "error", "You cannot re-create a resource",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "error", "Not resource found",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ResourceDeactivationException.class)
+    public ResponseEntity<DeactivateResourceOutDTO> handleResourceDeactivation(ResourceDeactivationException ex) {
+        DeactivateResourceOutDTO outDto = new DeactivateResourceOutDTO();
         outDto.setSuccess(false);
         outDto.setMessage(ex.getMessage());
 

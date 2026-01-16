@@ -1,13 +1,12 @@
 package com.jacobo.reservation_system.services.implementation;
 
-import com.jacobo.reservation_system.exceptions.UserDeactivationException;
-import com.jacobo.reservation_system.exceptions.UserNotFoundException;
+import com.jacobo.reservation_system.exceptions.AuthExceptions.UserDeactivationException;
+import com.jacobo.reservation_system.exceptions.AuthExceptions.UserNotFoundException;
 import com.jacobo.reservation_system.models.dtos.UserDtos.*;
 import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
 import com.jacobo.reservation_system.repositories.UsersRepository;
 import com.jacobo.reservation_system.services.IUserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

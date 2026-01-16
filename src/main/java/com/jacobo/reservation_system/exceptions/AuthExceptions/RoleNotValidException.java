@@ -1,4 +1,4 @@
-package com.jacobo.reservation_system.exceptions;
+package com.jacobo.reservation_system.exceptions.AuthExceptions;
 
 /**
  * When we set a non permitted role at registering moment

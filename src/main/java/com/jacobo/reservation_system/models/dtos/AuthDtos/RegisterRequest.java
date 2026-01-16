@@ -1,4 +1,4 @@
-package com.jacobo.reservation_system.models.dtos;
+package com.jacobo.reservation_system.models.dtos.AuthDtos;
 
 import lombok.Data;
 import java.util.List;

@@ -1,12 +1,11 @@
 package com.jacobo.reservation_system.services;
 
 import com.jacobo.reservation_system.models.dtos.UserDtos.*;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 /**
- * Service interface that defines methods to implement
+ * User service interface that defines methods to implement
  */
 public interface IUserService {
     public GetUserByIdOutDTO getUserById(Long id);

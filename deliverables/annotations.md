@@ -22,17 +22,17 @@ Regla:
 
 Solo ADMIN
 
-3️⃣ Gestión de recursos
+3️⃣ Gestión de recursos **TERMINADO**
 
 (Rama: resources)
 
 Acciones:
 
-- Crear recurso
+- Crear recurso **LISTO**
 
-- Listar recursos
+- Listar recursos **LISTO**
 
-- Activar / desactivar recurso
+- Activar / desactivar recurso **LISTO**
 
 Regla:
 

@@ -38,6 +38,7 @@ public class Users implements UserDetails { // Implement UserDetails for integra
      * automatically to MySQL
      */
     private Boolean active = true; // Indicates if the user is active
+                                    // True by default
 
     @ManyToMany(fetch = FetchType.EAGER) // Many-to-many relationships with roles, immediate loading
     @JoinTable(
@@ -45,7 +46,7 @@ public class Users implements UserDetails { // Implement UserDetails for integra
             joinColumns = @JoinColumn(name = "user_id"), // User FK
             inverseJoinColumns = @JoinColumn(name = "role_id") // Role FK
     )
-    private Set<Roles> roles = new HashSet<>(); // Set of roles assigned to the user
+    private Set<Roles> role = new HashSet<>(); // Set of roles assigned to the user
 
     @OneToMany(mappedBy = "user") // Attribute name from Reservations (user)
     private Set<Reservations> reservations;
@@ -54,7 +55,7 @@ public class Users implements UserDetails { // Implement UserDetails for integra
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Transform each role into an authority with the prefix "ROLE_"
-        return roles.stream()
+        return role.stream()
                 .map(r -> (GrantedAuthority) () -> "ROLE_" + r.getName())
                 .collect(Collectors.toSet());
     }

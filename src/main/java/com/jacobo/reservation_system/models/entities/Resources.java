@@ -20,5 +20,5 @@ public class Resources {
     private String description;
 
     @Column(name = "active")
-    private boolean active = true;
+    private boolean active = true; // Default value
 }

@@ -1,13 +1,13 @@
 package com.jacobo.reservation_system.services.implementation;
 
 import com.jacobo.reservation_system.exceptions.AuthExceptions.UserNotFoundException;
-import com.jacobo.reservation_system.exceptions.ResourcesExceptions.CreateResourceException;
+import com.jacobo.reservation_system.exceptions.MissFillingFieldsException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceAlreadyCreatedException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceDeactivationException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceNotFoundException;
-import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourceInDTO;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourcesInDTO;
 import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourcesOutDTO;
-import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourceOutDTO;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourcesOutDTO;
 import com.jacobo.reservation_system.models.dtos.ResourcesDtos.ListAllResourcesOutDTO;
 import com.jacobo.reservation_system.models.entities.Resources;
 import com.jacobo.reservation_system.models.entities.Roles;
@@ -45,11 +45,11 @@ public class ResourcesService implements IResourcesService {
      * @return outDto
      */
     @Override
-    public CreateResourcesOutDTO createResource(CreateResourceInDTO inDto) {
+    public CreateResourcesOutDTO createResource(CreateResourcesInDTO inDto) {
         if (inDto.getName() == null || inDto.getName().isBlank()
             || inDto.getDescription() == null || inDto.getDescription().isBlank()) {
 
-            throw new CreateResourceException("Complete the creation info");
+            throw new MissFillingFieldsException("Complete the creation info");
         }
 
         if (resourcesRepo.findByName(inDto.getName()).isPresent()) {
@@ -59,7 +59,7 @@ public class ResourcesService implements IResourcesService {
         Resources resource = new Resources();
         resource.setName(inDto.getName());
         resource.setDescription(inDto.getDescription());
-        resource.setActive(inDto.isActive());
+        resource.setActive(true);
 
         resourcesRepo.save(resource);
 
@@ -101,12 +101,12 @@ public class ResourcesService implements IResourcesService {
         String username = auth.getName();
 
         Users user = usersRepo.findByUsername(username).orElseThrow(
-                () -> new UserNotFoundException("Username not registered yet")
+                () -> new UserNotFoundException("Enter an existing username")
         );
 
         List<ListAllResourcesOutDTO> outDto = new ArrayList<>();
 
-        for (Roles role: user.getRoles()) {
+        for (Roles role: user.getRole()) {
             if (role.getName().equals("ADMIN")) {
 
                 for (Resources res: adminRes) {
@@ -138,12 +138,12 @@ public class ResourcesService implements IResourcesService {
      * @return outDto
      */
     @Override
-    public DeactivateResourceOutDTO deactivateResource(Long id) {
+    public DeactivateResourcesOutDTO deactivateResource(Long id) {
         Resources resource = resourcesRepo.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Enter an existing ID")
         );
 
-        DeactivateResourceOutDTO dto = new DeactivateResourceOutDTO();
+        DeactivateResourcesOutDTO dto = new DeactivateResourcesOutDTO();
 
         if (!resource.isActive()) {
             throw new ResourceDeactivationException("Resource is already deactivated");

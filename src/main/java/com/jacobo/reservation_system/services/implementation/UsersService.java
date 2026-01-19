@@ -6,7 +6,7 @@ import com.jacobo.reservation_system.models.dtos.UserDtos.*;
 import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
 import com.jacobo.reservation_system.repositories.UsersRepository;
-import com.jacobo.reservation_system.services.IUserService;
+import com.jacobo.reservation_system.services.IUsersService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
  * Implements his interface
  */
 @Service
-public class UserService implements IUserService {
+public class UsersService implements IUsersService {
     /**
      * It brings JPA methods
      */
@@ -28,7 +28,7 @@ public class UserService implements IUserService {
      * Access to the methods
      * @param userRepo
      */
-    public UserService(UsersRepository userRepo) {
+    public UsersService(UsersRepository userRepo) {
         this.userRepo = userRepo;
     }
 
@@ -37,17 +37,17 @@ public class UserService implements IUserService {
      * @return user's dto
      */
     @Override
-    public GetUserByIdOutDTO getUserById(Long id) {
+    public GetUsersByIdOutDTO getUserById(Long id) {
         Users user = userRepo.findById(id).orElseThrow(
                 () -> new UserNotFoundException("Enter an existing id")
         );
 
-        GetUserByIdOutDTO dto = new GetUserByIdOutDTO();
+        GetUsersByIdOutDTO dto = new GetUsersByIdOutDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setActive(user.getActive());
         dto.setRole(
-                user.getRoles().stream().map(
+                user.getRole().stream().map(
                         Roles::getName
                 ).toList()
         );
@@ -70,7 +70,7 @@ public class UserService implements IUserService {
                     dto.setId(users.getId());
                     dto.setUsername(users.getUsername());
                     dto.setRole(
-                            users.getRoles().stream().map(
+                            users.getRole().stream().map(
                                     Roles::getName
                             ).toList()
                     );
@@ -88,11 +88,11 @@ public class UserService implements IUserService {
      * @return outDto
      */
     @Override
-    public DeactivateUserOutDTO deactivateUser(Long id) {
+    public DeactivateUsersOutDTO deactivateUser(Long id) {
         Users user = userRepo.findById(id).
                 orElseThrow(() -> new UserNotFoundException("Enter an existing ID"));
 
-        DeactivateUserOutDTO outDto = new DeactivateUserOutDTO();
+        DeactivateUsersOutDTO outDto = new DeactivateUsersOutDTO();
 
         if (!user.getActive()) {
             throw new UserDeactivationException("User is already deactivated");
@@ -113,13 +113,13 @@ public class UserService implements IUserService {
      * @return outDTO
      */
     @Override
-    public DeleteUserOutDTO deleteUser(Long id) {
+    public DeleteUsersOutDTO deleteUser(Long id) {
         Users user = userRepo.findById(id).
                 orElseThrow(() -> new UserNotFoundException("Enter an existing ID"));
 
         userRepo.delete(user);
 
-        DeleteUserOutDTO outDTO = new DeleteUserOutDTO();
+        DeleteUsersOutDTO outDTO = new DeleteUsersOutDTO();
         outDTO.setSuccess(true);
         outDTO.setMessage("User deleted successfully");
 

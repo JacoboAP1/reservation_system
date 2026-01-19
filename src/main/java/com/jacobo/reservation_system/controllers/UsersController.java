@@ -1,7 +1,7 @@
 package com.jacobo.reservation_system.controllers;
 
 import com.jacobo.reservation_system.models.dtos.UserDtos.*;
-import com.jacobo.reservation_system.services.implementation.UserService;
+import com.jacobo.reservation_system.services.implementation.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,13 +25,13 @@ public class UsersController {
      * It invokes user service
      * It delegates business logic on the methods below
      */
-    private final UserService userService;
+    private final UsersService userService;
 
     /**
      * We inject user service inside the constructor
      * @param userService
      */
-    public UsersController(UserService userService) {
+    public UsersController(UsersService userService) {
         this.userService = userService;
     }
 
@@ -59,7 +59,7 @@ public class UsersController {
     }) //Swagger annotation
     @GetMapping("/obtain_user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public GetUserByIdOutDTO getUsersById(@PathVariable("id") Long id) {
+    public GetUsersByIdOutDTO getUsersById(@PathVariable("id") Long id) {
         return userService.getUserById(id);
     }
 
@@ -74,7 +74,7 @@ public class UsersController {
     }) //Swagger annotation
     @PatchMapping("deactivate_user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public DeactivateUserOutDTO deactivateUser(@PathVariable("id") Long id) {
+    public DeactivateUsersOutDTO deactivateUser(@PathVariable("id") Long id) {
         return userService.deactivateUser(id);
     }
 
@@ -89,8 +89,8 @@ public class UsersController {
     }) //Swagger annotation
     @DeleteMapping("delete_user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DeleteUserOutDTO> deleteUser(@PathVariable("id") Long id) {
-        DeleteUserOutDTO outDto = userService.deleteUser(id);
+    public ResponseEntity<DeleteUsersOutDTO> deleteUser(@PathVariable("id") Long id) {
+        DeleteUsersOutDTO outDto = userService.deleteUser(id);
 
         return ResponseEntity.ok(outDto);
     }

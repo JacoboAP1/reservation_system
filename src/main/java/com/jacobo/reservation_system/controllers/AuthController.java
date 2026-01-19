@@ -1,6 +1,7 @@
 package com.jacobo.reservation_system.controllers;
 
 import com.jacobo.reservation_system.exceptions.AuthExceptions.*;
+import com.jacobo.reservation_system.exceptions.MissFillingFieldsException;
 import com.jacobo.reservation_system.models.dtos.AuthDtos.RegisterRequest;
 import com.jacobo.reservation_system.models.entities.Roles;
 import com.jacobo.reservation_system.models.entities.Users;
@@ -75,7 +76,7 @@ public class AuthController {
                 || email == null || email.isBlank()
                 || password == null || password.isBlank()) {
 
-            throw new MissFillingFieldsException("Fill all the fields");
+            throw new MissFillingFieldsException("Complete all the fields");
         }
 
         // Search for users in the database
@@ -95,7 +96,7 @@ public class AuthController {
         // If the credentials are incorrect, throws AuthenticationException → 401 by default
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-        var roles = user.getRoles().stream().map(Roles::getName).toList();
+        var roles = user.getRole().stream().map(Roles::getName).toList();
         String token = jwt.generate(user.getUsername(), roles);
 
         return Map.of(
@@ -136,6 +137,11 @@ public class AuthController {
                 ? List.of("USER")
                 : req.getRoles();
 
+        if (roleNames.size() > 1) {
+            throw new MultipleRolesException("Maybe you may undo this restriction " +
+                    "for projects in the future");
+        }
+
         // Correct management of role to avoid ConcurrentModificationException
         Set<Roles> roleEntities = new HashSet<>();
         for (String roleName : roleNames) {
@@ -156,7 +162,7 @@ public class AuthController {
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setRoles(roleEntities);
+        user.setRole(roleEntities);
 
         userRepo.save(user);
 

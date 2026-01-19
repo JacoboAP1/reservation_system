@@ -8,7 +8,7 @@ import java.util.List;
  * about a specific user
  */
 @Data
-public class GetUserByIdOutDTO {
+public class GetUsersByIdOutDTO {
     private Long id;
     private String username;
     private Boolean active;

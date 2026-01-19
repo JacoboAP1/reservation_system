@@ -1,10 +1,9 @@
 package com.jacobo.reservation_system.controllers;
 
-import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourceInDTO;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourcesInDTO;
 import com.jacobo.reservation_system.models.dtos.ResourcesDtos.CreateResourcesOutDTO;
-import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourceOutDTO;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourcesOutDTO;
 import com.jacobo.reservation_system.models.dtos.ResourcesDtos.ListAllResourcesOutDTO;
-import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUserOutDTO;
 import com.jacobo.reservation_system.services.implementation.ResourcesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,7 +43,7 @@ public class ResourcesController {
     }) //Swagger annotation
     @PostMapping("/create_resource")
     @PreAuthorize("hasRole('ADMIN')")
-    public CreateResourcesOutDTO createResource(@RequestBody CreateResourceInDTO inDto) {
+    public CreateResourcesOutDTO createResource(@RequestBody CreateResourcesInDTO inDto) {
         return resourcesServ.createResource(inDto);
     }
 
@@ -71,7 +70,7 @@ public class ResourcesController {
     }) //Swagger annotation
     @PatchMapping("deactivate_resource/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public DeactivateResourceOutDTO deactivateResource(@PathVariable("id") Long id) {
+    public DeactivateResourcesOutDTO deactivateResource(@PathVariable("id") Long id) {
         return resourcesServ.deactivateResource(id);
     }
 

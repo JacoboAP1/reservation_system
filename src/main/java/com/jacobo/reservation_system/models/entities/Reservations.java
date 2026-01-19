@@ -3,7 +3,7 @@ package com.jacobo.reservation_system.models.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "reservations")
@@ -24,11 +24,12 @@ public class Reservations {
     private Resources resource;
 
     @Column(name = "start_date_time")
-    private LocalDateTime start_date_time;
+    private LocalDate start_date; // Only date, not time
+                                // For using date + time, import LocalDatetime
 
     @Column(name = "end_date_time")
-    private LocalDateTime end_date_time;
+    private LocalDate end_date;
 
     @Column(name = "status")
-    private String status;
+    private String status = "active"; // By default
 }

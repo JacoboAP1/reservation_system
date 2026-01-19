@@ -1,12 +1,13 @@
 package com.jacobo.reservation_system.exceptions;
 
 import com.jacobo.reservation_system.exceptions.AuthExceptions.*;
-import com.jacobo.reservation_system.exceptions.ResourcesExceptions.CreateResourceException;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDeniedException;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDuplicatedException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceAlreadyCreatedException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceDeactivationException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceNotFoundException;
-import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourceOutDTO;
-import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUserOutDTO;
+import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourcesOutDTO;
+import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUsersOutDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
-                        "error", "Username or password or email empty",
+                        "error", "Some field not filled",
                         "message", ex.getMessage()
                 ));
     }
@@ -72,6 +73,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // When user enters more than one role (not valid for this system, maybe for
+    // projects in the future)
+    @ExceptionHandler(MultipleRolesException.class)
+    public ResponseEntity<Map<String, Object>> handleMultipleRoles(MultipleRolesException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "Not possible to enter multiple roles in this system",
+                        "message", ex.getMessage()
+                ));
+    }
+
     // Spring security exception caught here to throw another HTTP status
     // Not 403 forbidden
     @ExceptionHandler(AccessDeniedException.class)
@@ -85,22 +98,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserDeactivationException.class)
-    public ResponseEntity<DeactivateUserOutDTO> handleUserDeactivation(UserDeactivationException ex) {
-        DeactivateUserOutDTO outDto = new DeactivateUserOutDTO();
+    public ResponseEntity<DeactivateUsersOutDTO> handleUserDeactivation(UserDeactivationException ex) {
+        DeactivateUsersOutDTO outDto = new DeactivateUsersOutDTO();
         outDto.setSuccess(false);
         outDto.setMessage(ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT).body(outDto);
-    }
-
-    @ExceptionHandler(CreateResourceException.class)
-    public ResponseEntity<Map<String, Object>> handleCreateResource(CreateResourceException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST).body(Map.of(
-                        "error", "Name or description empty",
-                        "message", ex.getMessage()
-                ));
     }
 
     @ExceptionHandler(ResourceAlreadyCreatedException.class)
@@ -122,13 +126,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceDeactivationException.class)
-    public ResponseEntity<DeactivateResourceOutDTO> handleResourceDeactivation(ResourceDeactivationException ex) {
-        DeactivateResourceOutDTO outDto = new DeactivateResourceOutDTO();
+    public ResponseEntity<DeactivateResourcesOutDTO> handleResourceDeactivation(ResourceDeactivationException ex) {
+        DeactivateResourcesOutDTO outDto = new DeactivateResourcesOutDTO();
         outDto.setSuccess(false);
         outDto.setMessage(ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT).body(outDto);
+    }
+
+    @ExceptionHandler(ReservationDuplicatedException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicatedReservation(ReservationDuplicatedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_ACCEPTABLE).body(Map.of(
+                        "error", "Reservation can't be duplicated",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ReservationDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleDeniedReservation(ReservationDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT).body(Map.of(
+                        "error", "Impossible to book a reservation",
+                        "message", ex.getMessage()
+                ));
     }
 }
 

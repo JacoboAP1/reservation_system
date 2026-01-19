@@ -12,11 +12,11 @@
 
 Acciones:
 
-- Ver usuarios
+- Ver usuarios **LISTO**
 
-- Activar / desactivar usuario
+- Activar / desactivar usuario **LISTO**
 
-- Eliminar usuario
+- Eliminar usuario **LISTO**
 
 Regla:
 
@@ -44,7 +44,7 @@ Solo recursos activos se pueden reservar
 
 Acciones:
 
-- Crear reserva
+- Crear reserva **LISTO**
 
 - Listar reservas del usuario
 

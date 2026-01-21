@@ -43,7 +43,7 @@ public class UsersController {
             @ApiResponse(responseCode = "200", description = "Return of users list successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized role for that action")
     }) //Swagger annotation
-    @GetMapping("/obtain_users")
+    @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
     public List<GetAllUsersOutDTO> getUsersList() {
         return userService.getUsers();
@@ -57,7 +57,7 @@ public class UsersController {
             @ApiResponse(responseCode = "200", description = "Info returned successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized role for that action")
     }) //Swagger annotation
-    @GetMapping("/obtain_user/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public GetUsersByIdOutDTO getUsersById(@PathVariable("id") Long id) {
         return userService.getUserById(id);

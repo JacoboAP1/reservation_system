@@ -8,7 +8,7 @@ public class ReservationSystemApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ReservationSystemApplication.class, args);
-		System.out.println("Reservation system application started!");
+		System.out.println("Reservation system application running!");
 	}
 
 }

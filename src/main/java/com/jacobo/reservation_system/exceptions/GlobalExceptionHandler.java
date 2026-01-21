@@ -1,11 +1,14 @@
 package com.jacobo.reservation_system.exceptions;
 
 import com.jacobo.reservation_system.exceptions.AuthExceptions.*;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationAlreadyCanceled;
 import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDeniedException;
 import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDuplicatedException;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationNotFoundException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceAlreadyCreatedException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceDeactivationException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceNotFoundException;
+import com.jacobo.reservation_system.models.dtos.ReservationsDtos.DeactivateReservationsOutDTO;
 import com.jacobo.reservation_system.models.dtos.ResourcesDtos.DeactivateResourcesOutDTO;
 import com.jacobo.reservation_system.models.dtos.UserDtos.DeactivateUsersOutDTO;
 import org.springframework.http.HttpStatus;
@@ -93,7 +96,7 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of(
                         "error", "Invalid role for that action",
-                        "message", "Only ADMIN users can access this resource"
+                        "message", "Register with other credentials"
                 ));
     }
 
@@ -151,6 +154,25 @@ public class GlobalExceptionHandler {
                         "error", "Impossible to book a reservation",
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(ReservationNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFoundReservation(ReservationNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "error", "Reservation not found",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ReservationAlreadyCanceled.class)
+    public ResponseEntity<DeactivateReservationsOutDTO> handleResourceDeactivation(ReservationAlreadyCanceled ex) {
+        DeactivateReservationsOutDTO outDto = new DeactivateReservationsOutDTO();
+        outDto.setSuccess(false);
+        outDto.setMessage(ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT).body(outDto);
     }
 }
 

@@ -54,7 +54,7 @@ public class ResourcesController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Return of resources list successfully")
     }) //Swagger annotation
-    @GetMapping("/obtain_resources")
+    @GetMapping("/")
     public List<ListAllResourcesOutDTO> getResourcesList() {
         return resourcesServ.listAllResources();
     }

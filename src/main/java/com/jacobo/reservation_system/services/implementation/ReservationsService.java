@@ -3,12 +3,16 @@ package com.jacobo.reservation_system.services.implementation;
 import com.jacobo.reservation_system.exceptions.AuthExceptions.UserDeactivationException;
 import com.jacobo.reservation_system.exceptions.AuthExceptions.UserNotFoundException;
 import com.jacobo.reservation_system.exceptions.MissFillingFieldsException;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationAlreadyCanceled;
 import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDeniedException;
 import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationDuplicatedException;
+import com.jacobo.reservation_system.exceptions.ReservationsExceptions.ReservationNotFoundException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceDeactivationException;
 import com.jacobo.reservation_system.exceptions.ResourcesExceptions.ResourceNotFoundException;
 import com.jacobo.reservation_system.models.dtos.ReservationsDtos.CreateReservationsInDTO;
 import com.jacobo.reservation_system.models.dtos.ReservationsDtos.CreateReservationsOutDTO;
+import com.jacobo.reservation_system.models.dtos.ReservationsDtos.DeactivateReservationsOutDTO;
+import com.jacobo.reservation_system.models.dtos.ReservationsDtos.GetAllReservationsOutDTO;
 import com.jacobo.reservation_system.models.entities.Reservations;
 import com.jacobo.reservation_system.models.entities.Resources;
 import com.jacobo.reservation_system.models.entities.Users;
@@ -21,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +63,7 @@ public class ReservationsService implements IReservationsService {
         String username = auth.getName();
 
         Users user = userRepo.findByUsername(username).orElseThrow(
-                () -> new UserNotFoundException("Not username found in the data base")
+                () -> new UserNotFoundException("Not user authenticated")
         );
 
         Resources resource = resourceRepo.findById(inDto.getResource_id()).
@@ -83,7 +88,7 @@ public class ReservationsService implements IReservationsService {
         }
 
         // If there's a reservation with the same resource as the JSON body
-        // Checks that the present dates don't overlap with the existing ones
+        // Looks for overlapped reservations
         List<Reservations> reservations = resRepo.findOverlappingReservations(
                 resource.getId(), new_start_date, new_end_date
         );
@@ -92,9 +97,10 @@ public class ReservationsService implements IReservationsService {
             throw new ReservationDuplicatedException("These dates overlap with an existing one");
         }
 
-        // If a user has more than one active reservation throws an exception
+        // Looks for number of active reservations from a user
         long activeReservations = resRepo.countByUserIdAndStatus(user.getId(), "active");
 
+        // If a user has more than one active reservation throws an exception
         if (activeReservations > 0) {
             throw new ReservationDeniedException("You cannot have more than 1 active reservation");
         }
@@ -113,6 +119,76 @@ public class ReservationsService implements IReservationsService {
                 "GETTERS endpoints");
 
         outDto.setStatus("active");
+
+        return outDto;
+    }
+
+    /**
+     * Method that lists all reservations depending on the role
+     * @return outDto list
+     */
+    @Override
+    public List<GetAllReservationsOutDTO> listReservations() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        Users user = userRepo.findByUsername(auth.getName())
+                .orElseThrow(() -> new UserNotFoundException("Not user authenticated"));
+
+        // Returns true if it finds any role with ADMIN's name
+        // .anyMatch() return the boolean value if it's found
+        boolean isAdmin = user.getRole().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+
+        List<Reservations> reservations;
+
+        if (isAdmin) {
+            // ADMIN is able to see all reservations (active and inactive)
+            reservations = resRepo.findAll();
+        } else {
+            // USER is able to see only his own reservations (active and inactive)
+            reservations = resRepo.findByUserId(user.getId());
+        }
+
+        List<GetAllReservationsOutDTO> outDto = new ArrayList<>();
+
+        for (Reservations reservation : reservations) {
+            GetAllReservationsOutDTO dto = new GetAllReservationsOutDTO();
+
+            if (isAdmin) {
+                // Only ADMIN can see the associated user
+                dto.setUser(reservation.getUser().getId());
+            }
+            dto.setResource(reservation.getResource().getId());
+            dto.setStart_date(reservation.getStart_date());
+            dto.setEnd_date(reservation.getEnd_date());
+            dto.setStatus(reservation.getStatus());
+            outDto.add(dto);
+        }
+
+        return outDto;
+    }
+
+    /**
+     * Method that deactivates a reservation
+     * Firstly searches for the ID
+     * @param id
+     * @return outDto
+     */
+    @Override
+    public DeactivateReservationsOutDTO deactivateReservation(Long id) {
+        Reservations reservation = resRepo.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("Enter an existing ID"));
+
+        if (!reservation.getStatus().equals("active")) {
+            throw new ReservationAlreadyCanceled("Cannot re-deactivate a reservation");
+        }
+
+        reservation.setStatus("inactive");
+        resRepo.save(reservation);
+
+        DeactivateReservationsOutDTO outDto = new DeactivateReservationsOutDTO();
+        outDto.setSuccess(true);
+        outDto.setMessage("Reservation canceled successfully");
 
         return outDto;
     }

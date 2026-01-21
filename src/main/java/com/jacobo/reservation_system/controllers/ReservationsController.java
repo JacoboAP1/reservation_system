@@ -2,16 +2,17 @@ package com.jacobo.reservation_system.controllers;
 
 import com.jacobo.reservation_system.models.dtos.ReservationsDtos.CreateReservationsInDTO;
 import com.jacobo.reservation_system.models.dtos.ReservationsDtos.CreateReservationsOutDTO;
+import com.jacobo.reservation_system.models.dtos.ReservationsDtos.DeactivateReservationsOutDTO;
+import com.jacobo.reservation_system.models.dtos.ReservationsDtos.GetAllReservationsOutDTO;
 import com.jacobo.reservation_system.services.implementation.ReservationsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller for reservations management
@@ -45,5 +46,35 @@ public class ReservationsController {
     @PreAuthorize("hasRole('USER')")
     public CreateReservationsOutDTO createReservation(@RequestBody CreateReservationsInDTO inDto) {
         return reservationSer.createReservations(inDto);
+    }
+
+    @Operation (
+            summary = "Show list of reservations",
+            description = "Shows list of reservations depending on the role " +
+                    "(ADMIN = All reservations, (USER) = Only his own ones"
+    ) //Swagger annotation
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reservation created successfully"),
+            @ApiResponse(responseCode = "404", description = "User not authenticated yet")
+
+    }) //Swagger annotation
+    @GetMapping("/")
+    public List<GetAllReservationsOutDTO> listReservations() {
+        return reservationSer.listReservations();
+    }
+
+    @Operation (
+            summary = "Deactivate reservation",
+            description = "Deactivates reservation by searching for its ID (USER or ADMIN)"
+    ) //Swagger annotation
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reservation created successfully"),
+            @ApiResponse(responseCode = "409", description = "Conflict. Already deactivated reservation"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found")
+
+    }) //Swagger annotation
+    @PatchMapping("/deactivate/{id}")
+    public DeactivateReservationsOutDTO deactivateReservation(@PathVariable("id") Long id) {
+        return reservationSer.deactivateReservation(id);
     }
 }

@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8
+    container_name: reservation_db
+    environment:
+      MYSQL_DATABASE: reservation_system
+      MYSQL_ROOT_PASSWORD: admin123
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    image: reservation-system
+    container_name: reservation_app
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/reservation_system
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin123
+
+volumes:
+  db_data:

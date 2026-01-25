@@ -9,10 +9,10 @@ FROM maven:3.9.8-amazoncorretto-21 AS build
 WORKDIR /app
 
 # Copy the Maven configuration file first to leverage Docker cache
-COPY pom.xml .
+COPY ../pom.xml .
 
 # Copy the source code
-COPY src ./src
+COPY ../src ./src
 
 # Build the application and generate the JAR file
 # Tests are skipped to speed up the build
